@@ -9,7 +9,7 @@ import torchmetrics
 class LitModel(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
-        parser = parent_parser.add_argument_group('LitModel')
+        parser = parent_parser.add_argument_group("LitModel")
         parser.add_argument("--learning_rate", type=float, default=1e-3)
         return parent_parser
 

@@ -1,18 +1,16 @@
 from argparse import ArgumentParser
-import pytorch_lightning as pl
+from pytorch_lightning import Trainer
 
-import models.bases as base_models
-import datamodules.bases as base_datamodule
+from models.bases import LitModel
+from datamodules.bases import FashionMNISTDataModule
 
 
 parser = ArgumentParser()
 
-parser = base_models.LitModel.add_model_specific_args(parser)
+parser = LitModel.add_model_specific_args(parser)
+parser = Trainer.add_argparse_args(parser)
 args = parser.parse_args()
-print(args)
 
-model = base_models.LitModel(args)
-trainer = pl.Trainer(
-    gpus=1, limit_train_batches=1.0, limit_val_batches=1.0, max_epochs=1
-)
-trainer.fit(model, datamodule=base_datamodule.FashionMNISTDataModule())
+model = LitModel(args)
+trainer = Trainer.from_argparse_args(args)
+trainer.fit(model, datamodule=FashionMNISTDataModule())
