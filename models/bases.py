@@ -20,6 +20,7 @@ class LitModel(pl.LightningModule):
         )
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
+        self.test_acc = torchmetrics.Accuracy()
 
     def forward(self, x):
         x = self.flatten(x)
@@ -57,7 +58,9 @@ class LitModel(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('Loss/test', loss, on_step=False, on_epoch=True)
-        correct = (y_hat.argmax(1) == y).type(torch.float).sum().item()
-        self.log('Accuracy/test', correct, on_step=False, on_epoch=True)
+        self.log('Test/loss', loss, on_step=False, on_epoch=True)
+        self.test_acc(y_hat, y)
         return loss
+
+    def test_epoch_end(self, outs):
+        self.log('Test/accuracy', self.test_acc.compute())
