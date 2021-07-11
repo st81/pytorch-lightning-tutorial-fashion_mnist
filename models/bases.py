@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -6,8 +7,16 @@ import torchmetrics
 
 
 class LitModel(pl.LightningModule):
-    def __init__(self):
+    @staticmethod
+    def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:
+        parser = parent_parser.add_argument_group('LitModel')
+        parser.add_argument("--learning_rate", type=float, default=1e-3)
+        return parent_parser
+
+    def __init__(self, args):
         super().__init__()
+        self.save_hyperparameters(args)
+        self.learning_rate = self.hparams.learning_rate
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(28 * 28, 512),
@@ -27,8 +36,11 @@ class LitModel(pl.LightningModule):
         return logits
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
         return optimizer
+
+    def on_train_start(self):
+        self.logger.log_hyperparams(self.hparams, {"hp/lr": self.learning_rate})
 
     def training_step(self, batch, batch_idx):
         x, y = batch
