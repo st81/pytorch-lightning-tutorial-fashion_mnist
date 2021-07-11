@@ -6,12 +6,11 @@ import torchmetrics
 
 
 class LitModel(pl.LightningModule):
-
     def __init__(self):
         super().__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
+            nn.Linear(28 * 28, 512),
             nn.ReLU(),
             nn.Linear(512, 512),
             nn.ReLU(),
@@ -36,31 +35,31 @@ class LitModel(pl.LightningModule):
         x = self.flatten(x)
         y_hat = self.linear_relu_stack(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('Loss/train', loss, on_step=False, on_epoch=True)
+        self.log("Loss/train", loss, on_step=False, on_epoch=True)
         self.train_acc(y_hat, y)
         return loss
 
     def training_epoch_end(self, outs):
-        self.log('Accuracy/train', self.train_acc.compute())
+        self.log("Accuracy/train", self.train_acc.compute())
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         val_loss = F.cross_entropy(y_hat, y)
-        self.log('Loss/val', val_loss, on_step=False, on_epoch=True)
+        self.log("Loss/val", val_loss, on_step=False, on_epoch=True)
         self.val_acc(y_hat, y)
         return val_loss
-    
+
     def validation_epoch_end(self, outs):
-        self.log('Accuracy/val', self.val_acc.compute())
+        self.log("Accuracy/val", self.val_acc.compute())
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('Test/loss', loss, on_step=False, on_epoch=True)
+        self.log("Test/loss", loss, on_step=False, on_epoch=True)
         self.test_acc(y_hat, y)
         return loss
 
     def test_epoch_end(self, outs):
-        self.log('Test/accuracy', self.test_acc.compute())
+        self.log("Test/accuracy", self.test_acc.compute())
